@@ -1251,7 +1251,7 @@ int readwrite (fd)
    we create a expendable copy and give *that* to select.  *Fuck* me ... */
     if (timer1)
       memcpy (timer2, timer1, sizeof (struct timeval));
-    rr = select (16, ding2, 0, 0, timer2);	/* here it is, kiddies */
+    rr = select (fd+1, ding2, 0, 0, timer2);	/* here it is, kiddies */
     if (rr < 0) {
 	if (errno != EINTR) {		/* might have gotten ^Zed, etc ?*/
 	  holler ("select fuxored");
