@@ -15,7 +15,7 @@ XLIBS =		# xtra libs if necessary?
 # -Bstatic for sunos,  -static for gcc, etc.  You want this, trust me.
 STATIC =
 CC = gcc $(CFLAGS)
-LD = $(CC)	# linker; defaults to unstripped executables
+LD = $(CC) $(LDFLAGS)	# linker; defaults to unstripped executables
 o = o		# object extension
 
 ALL = nc
