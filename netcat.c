@@ -86,6 +86,10 @@
 #include <unistd.h>
 #endif
 
+#ifndef SOL_IP
+# define SOL_IP IPPROTO_IP
+#endif
+
 /* handy stuff: */
 #define SA struct sockaddr	/* socket overgeneralization braindeath */
 #define SAI struct sockaddr_in	/* ... whoever came up with this model */
