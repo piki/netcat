@@ -1830,8 +1830,9 @@ options:");
 	-v			verbose [use twice to be more verbose]\n\
 	-w secs			timeout for connects and final net reads\n\
 	-z			zero-I/O mode [used for scanning]");
-  bail ("port numbers can be individual or ranges: lo-hi [inclusive];\n\
+  holler ("port numbers can be individual or ranges: lo-hi [inclusive];\n\
 hyphens in port names must be backslash escaped (e.g. 'ftp\\-data').");
+  quit();
 } /* helpme */
 #endif /* HAVE_HELP */
 
