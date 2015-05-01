@@ -73,6 +73,9 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>		/* O_WRONLY et al */
+#ifdef LINUX			/* Linux needs the HERE, oh well. */
+#include <resolv.h>
+#endif
 
 /* handy stuff: */
 #define SA struct sockaddr	/* socket overgeneralization braindeath */
@@ -235,9 +238,9 @@ void tmtravel ()
   longjmp (jbuf, jval);
 }
 
-/* arm :
+/* arm_timer :
    set the timer.  Zero secs arg means unarm */
-void arm (num, secs)
+void arm_timer (num, secs)
   unsigned int num;
   unsigned int secs;
 {
@@ -250,7 +253,7 @@ void arm (num, secs)
     alarm (secs);
     jval = num;
   } /* if secs */
-} /* arm */
+} /* arm_timer */
 
 /* Hmalloc :
    malloc up what I want, rounded up to *4, and pre-zeroed.  Either succeeds
@@ -743,14 +746,14 @@ Linux is also still a loss at 1.3.x it looks like; the lsrr code is { }...
   } /* if gatesidx */
 
 /* wrap connect inside a timer, and hit it */
-  arm (1, o_wait);
+  arm_timer (1, o_wait);
   if (setjmp (jbuf) == 0) {
     rr = connect (nnetfd, (SA *)remend, sizeof (SA));
   } else {				/* setjmp: connect failed... */
     rr = -1;
     errno = ETIMEDOUT;			/* fake it */
   }
-  arm (0, 0);
+  arm_timer (0, 0);
   if (rr == 0)
     return (nnetfd);
   close (nnetfd);			/* clean up junked socket FD!! */
@@ -820,14 +823,14 @@ int dolisten (rad, rp, lad, lp)
    actually does work after all.  Yow.  YMMV on strange platforms!  */
   if (o_udpmode) {
     x = sizeof (SA);		/* retval for recvfrom */
-    arm (2, o_wait);		/* might as well timeout this, too */
+    arm_timer (2, o_wait);		/* might as well timeout this, too */
     if (setjmp (jbuf) == 0) {	/* do timeout for initial connect */
       rr = recvfrom		/* and here we block... */
 	(nnetfd, bigbuf_net, BIGSIZ, MSG_PEEK, (SA *) remend, &x);
 Debug (("dolisten/recvfrom ding, rr = %d, netbuf %s ", rr, bigbuf_net))
     } else
       goto dol_tmo;		/* timeout */
-    arm (0, 0);
+    arm_timer (0, 0);
 /* I'm not completely clear on how this works -- BSD seems to make UDP
    just magically work in a connect()ed context, but we'll undoubtedly run
    into systems this deal doesn't work on.  For now, we apparently have to
@@ -845,12 +848,12 @@ Debug (("dolisten/recvfrom ding, rr = %d, netbuf %s ", rr, bigbuf_net))
 
 /* fall here for TCP */
   x = sizeof (SA);		/* retval for accept */
-  arm (2, o_wait);		/* wrap this in a timer, too; 0 = forever */
+  arm_timer (2, o_wait);		/* wrap this in a timer, too; 0 = forever */
   if (setjmp (jbuf) == 0) {
     rr = accept (nnetfd, (SA *)remend, &x);
   } else
     goto dol_tmo;		/* timeout */
-  arm (0, 0);
+  arm_timer (0, 0);
   close (nnetfd);		/* dump the old socket */
   nnetfd = rr;			/* here's our new one */
 
