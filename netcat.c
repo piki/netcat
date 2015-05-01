@@ -462,8 +462,10 @@ USHORT getportpoop (pstring, pnum)
     if (pstring)			/* one or the other, pleeze */
       return (0);
     x = pnum;
-    if (o_nflag)			/* go faster, skip getservbyblah */
-      goto gp_finish;
+    /* disabled, see bug #98902. if this is *really* slowing someone
+     * down I'll reconsider. */
+    /* if (o_nflag) */			/* go faster, skip getservbyblah */
+      /* goto gp_finish; */
     y = htons (x);			/* gotta do this -- see Fig.1 below */
     servent = getservbyport (y, whichp);
     if (servent) {
